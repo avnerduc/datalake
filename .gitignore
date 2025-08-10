@@ -1,0 +1,11 @@
+__pycache__
+.ipynb_checkpoints
+.python-version
+.DS_Store
+*.swp
+
+messages_bronze/
+messages_silver/
+messages_gold/
+reports/
+
