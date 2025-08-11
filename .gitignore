@@ -5,7 +5,9 @@ __pycache__
 *.swp
 
 messages_bronze/
+messages_bronze_injected/
 messages_silver/
 messages_gold/
 reports/
+api_sort_check.json
 

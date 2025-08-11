@@ -25,7 +25,7 @@ Additionally, the top 10 velocities per hour are recorded in a report.
 - `MAX_VELOCITY`: Set to the maximum velocity allowed without being considered an outlier.
 
 ### Clear outputs
-- To clear all outputs and start from scratch: `rm -rf messages_bronze messages_silver messages_gold reports`
+- To clear all outputs and start from scratch: `rm -rf messages_bronze messages_silver messages_gold reports api_sort_check.json messages_bronze_injected`
 
 ### Component
 - `run_pipeline.sh`: A script that builds Bronze -> Silver -> Gold + Top Velocities Report
@@ -35,6 +35,9 @@ Additionally, the top 10 velocities per hour are recorded in a report.
 - `report_top_speeds.py`: Produces a report of the 10 fastest vehicles per hour.
 - `EDA.ipynb`: A Jupyter Notebook for EDA
 - `.env` (hidden): Config file, mainly for configuring velocity outlier filtering
+- `simulate_injection.py`: Creates a copy of the Bronze level, and simulates an SQL injection query
+- `sql_injection.py`: Script for detecting SQL injections in bronze data. (See below)
+- `check_api_sorting.sh`: A script that verifies that the API returns unsorted entries.
 
 ### Further consideration
 - Current architecture is batch refresh.
@@ -53,11 +56,23 @@ Additionally, the top 10 velocities per hour are recorded in a report.
     - Load all -> load only relevant partitions
     - Save all -> Save only changed partitions
     - Manual run -> Scheduled with logs and monitoring
+- Server is random
+    - Since the server returns unsorted, random responses, using a HWM is irrelevant
+    - Therefore we skip such implementation
 - Next steps:
+    - These steps are relevant only for a server that returns sorted data
     - Make bronze incremental using HWM+lookback
     - Silver incremental - accepted changed partitions from Bronze, change only those
     - Gold/Report incremental - Recompute only affected hours/VINs
 
 ### Tests
 - Run unittests with `pytest -q`
+
+### SQL Injection detection
+- An SQL injection detection module is included: `sql_injection.py`
+- You can test it by:
+    - Run the whole pipeline, or at least make sure you created the `messages_bronze` dir.
+    - Run `simulate_injection.py` (or run all tests `pytest -q`)
+    - Then run `python -c "from sql_injection import example_injection_detection; example_injection_detection()"`
+    - You can then view the report under `reports/`
 
