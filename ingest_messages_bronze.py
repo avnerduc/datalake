@@ -11,6 +11,7 @@ Logs the number of dropped records for visibility.
 """
 
 import requests
+import os
 
 import pandas as pd
 import pyarrow as pa
@@ -57,7 +58,6 @@ def write_parquet(df: pd.DataFrame, out_dir: str):
         format="parquet",
         partitioning=["date", "hour"],
         partitioning_flavor="hive",
-        existing_data_behavior="overwrite_or_ignore"
     )
     print(f"[INFO] Wrote {len(df)} rows to {out_dir}/ partitioned by date/hour.")
 
