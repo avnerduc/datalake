@@ -6,31 +6,35 @@ A subsequent step cleans and standardizes the data into a SILVER level.
 The last state of each connected vehicle is extracted into a GOLD level.
 Additionally, the top 10 velocities per hour are recorded in a report.
 
-### Prerequisits
-- You will have to gain access to Docker image tarball, load it to docker, and run the server with port forwarding 9900:9900.
+The repo also includes a SQL injection detection script, as well as a script that simulates such an injection.
+
+There are a couple of other scripts, like a script that proves that the API responses are unsorted. For a full list, see the Components section below.
+
+### Prerequisites
+- You will have to gain access to the Docker image tarball, load it into Docker, and run the server with port forwarding 9900:9900.
 - Use Python 3.11.8 (virtual env encouraged)
 - Update `pip` with `python -m pip install --upgrade pip`
-- Install dependencies with `pip install -r requirement.txt`
+- Install dependencies with `pip install -r requirements.txt`
 
 ### Usage
 - Grant permission to the script with `chmod +x run_pipeline.sh`
 - Edit the `.env` file according to your preferences (see below)
-- Run the pipeline ./run_pipeline.sh
+- Run the pipeline with `./run_pipeline.sh`
 - Re-run the Jupyter Notebook to see graphs and statistics.
 - Open the top-speeds report from `reports/`
 
 ### `.env` file
-- `BRONZE_AMOUNT`: Number of entries to ingest into bronze
-- `APPLY_VELOCITY_FILTER`: Set to `1` to filter ourliers. Set to `0` to disable filtering.
+- `BRONZE_AMOUNT`: Number of entries to ingest into bronze level dataset
+- `APPLY_VELOCITY_FILTER`: Set to `1` to filter outliers. Set to `0` to disable filtering.
 - `MAX_VELOCITY`: Set to the maximum velocity allowed without being considered an outlier.
 
 ### Clear outputs
 - To clear all outputs and start from scratch: `rm -rf messages_bronze messages_silver messages_gold reports api_sort_check.json messages_bronze_injected`
 
-### Component
+### Components
 - `run_pipeline.sh`: A script that builds Bronze -> Silver -> Gold + Top Velocities Report
-- `ingest_messages_bronze.py`: Script for ingesting vehicles messages from API to a bronze parquet file with partitions
-- `sanitize_messages_silver.py`: Script for clearning and preprocessing the data.
+- `ingest_messages_bronze.py`: Script for ingesting vehicle messages from API to a bronze parquet file with partitions
+- `sanitize_messages_silver.py`: Script for cleaning and preprocessing the data.
 - `build_last_state_gold.py`: Extract the last state for each VIN
 - `report_top_speeds.py`: Produces a report of the 10 fastest vehicles per hour.
 - `EDA.ipynb`: A Jupyter Notebook for EDA
@@ -44,10 +48,10 @@ Additionally, the top 10 velocities per hour are recorded in a report.
     - Run is triggered manually by running a script.
     - No state, we start from a clean slate.
     - IO reads _all_ partitions each time
-    - Simple, but not very effecient
-    - Ephermal logs are only printed and not saved
+    - Simple, but not very efficient
+    - Ephemeral logs are only printed and not saved
 - For a real system we would switch to an incremental, partition-aware approach.
-    - Triggered periodically by AirFlow/Prefect
+    - Triggered periodically by Airflow/Prefect
     - Process only touched partitions, not all data
     - Stateful - use a high-water mark (hwm) to indicate last timestamp of ingestion
     - Keep logs persistent
